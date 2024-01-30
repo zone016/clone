@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clone.Console", "Clone.Console\Clone.Console.csproj", "{F927EF27-0707-4748-8922-E9712DC021DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clone.Git", "Clone.Git\Clone.Git.csproj", "{E1D56C76-676C-49BC-9A6E-5AAB19E81893}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -10,5 +14,15 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F927EF27-0707-4748-8922-E9712DC021DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F927EF27-0707-4748-8922-E9712DC021DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F927EF27-0707-4748-8922-E9712DC021DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F927EF27-0707-4748-8922-E9712DC021DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1D56C76-676C-49BC-9A6E-5AAB19E81893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D56C76-676C-49BC-9A6E-5AAB19E81893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D56C76-676C-49BC-9A6E-5AAB19E81893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1D56C76-676C-49BC-9A6E-5AAB19E81893}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
