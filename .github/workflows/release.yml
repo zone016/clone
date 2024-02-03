@@ -1,30 +1,85 @@
-name: Release the Artifact
+name: Release the Artifact for Multiple OS
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ "main" ]
-    
+    tags:
+      - 'v*'
+
 jobs:
-  build-linux:
+  build-and-release:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    outputs:
+      tagName: ${{ steps.set_tag_name.outputs.tagName }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Extract tag name
+      id: set_tag_name
+      run: echo "tagName=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+    
+    - name: Setup dotnet SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Build and Publish for Linux
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        make publish
+        mkdir -p ./bin/${{ matrix.os }}
+        mv ./Clone.Console/bin/Release/net8.0/*/publish/Clone.Console ./bin/${{ matrix.os }}/clone
+        sha256sum ./bin/${{ matrix.os }}/clone > ./bin/${{ matrix.os }}/sha256sum.txt
+
+    - name: Build and Publish for macOS
+      if: matrix.os == 'macos-latest'
+      run: |
+        make publish
+        mkdir -p ./bin/${{ matrix.os }}
+        mv ./Clone.Console/bin/Release/net8.0/*/publish/Clone.Console ./bin/${{ matrix.os }}/clone
+        shasum -a 256 ./bin/${{ matrix.os }}/clone > ./bin/${{ matrix.os }}/sha256sum.txt
+
+    - name: Build and Publish for Windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        .\Publish.ps1
+        mkdir -p .\bin\windows
+        mv .\Clone.Console\bin\Release\net8.0\win-x64\publish\Clone.Console.exe .\bin\windows\clone.exe
+        Get-FileHash .\bin\windows\clone.exe -Algorithm SHA256 | Format-List -Property Hash > .\bin\windows\sha256sum.txt
+      shell: pwsh
+
+    - name: Zip the artifacts for Linux and macOS
+      if: matrix.os != 'windows-latest'
+      run: |
+        zip -r ${{ matrix.os }}.zip ./bin/${{ matrix.os }}/
+      shell: bash
+      
+    - name: Zip the artifacts for Windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        Compress-Archive -Path .\bin\windows\* -DestinationPath .\windows-x64.zip
+      shell: pwsh
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-release
+        path: |
+          *.zip
+
+  create-release:
+    needs: build-and-release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup dotnet SDK
-      uses: actions/setup-dotnet@v4
+    - uses: actions/download-artifact@v4
+    - name: Create Release and Upload Artifacts
+      uses: softprops/action-gh-release@v1
       with:
-        dotnet-version: '8.0.x'
-    - name: Publish for Linux
-      run: make publish
+        files: |
+          ubuntu-release.zip
+          windows-release.zip
+          macos-release.zip
 
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup dotnet SDK
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '8.0.x'
-    - name: Publish for Windows
-      run: |
-        powershell ./Publish.ps1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
