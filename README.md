@@ -7,7 +7,7 @@ Eu tenho um problema muito sério de acumular uma quantidade absurda de *clones*
 
 Eu provavelmente deveria ter olhado a documentação do Git de forma mais profunda, eu realmente não sei se isso que implementei é uma *feature*, mas como diria o profeta: Qual o sentido de ver algo que você pode gastar uma horinha para entender, se você pode gastar 100 horas para implementar algo que você não entende? Enfim, aqui vai as *features* dessa simpática ferramenta chamada `clone`:
 
-- **Nativa**, e **sem nenhuma dependência**;
+- **Nativo** (sim, [dotnet tem um AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/)), e **sem nenhuma dependência**;
 - Salva suas tralhas OSS de forma organizada pelo `owner`; e
 - Você pode escolher o diretório que deseja salvar os projetos.
 
@@ -47,7 +47,11 @@ E é isso. Você pode usar o `clone` sem nenhuma configuração adicional.
 
 ## Instalação
 
-Deixei um `Makefile` para facilitar a sua vida. Você pode usar o `make` para compilar o `clone` chamando `make publish`, e para instalar o `clone` chamando `make install`.
+Basta verificar o último *release* e baixar o binário correspondente ao seu sistema operacional. Dentro do `.zip` tera o binário do `clone`, e você pode colocar ele onde quiser, e adicionar no seu `$PATH`.
+
+## Build
+
+Deixei um `Makefile` para facilitar a sua vida. Você pode usar o `make` para compilar o `clone` chamando `make publish`, e consumir o artefato gerado no respectivo destino dado o seu SO.
 
 ## Licença
 
