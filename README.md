@@ -51,4 +51,4 @@ Deixei um `Makefile` para facilitar a sua vida. Você pode usar o `make` para co
 
 ## Licença
 
-Como não tenho pasciência para escolher uma licença, considere a WTFPL como a licença desse projeto. Você pode fazer o que quiser com o código, e eu não me importo com nada. A única coisa que eu peço é que você não me processe se algo der errado, ou se precisar de algum suporte.
+Como não tenho paciência para escolher uma licença, considere a WTFPL como a licença desse projeto. Você pode fazer o que quiser com o código, e eu não me importo com nada. A única coisa que eu peço é que você não me processe se algo der errado, ou se precisar de algum suporte.
