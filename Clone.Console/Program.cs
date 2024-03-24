@@ -26,6 +26,7 @@ var cloneFolder = Path.Combine(destinationFolder, repository);
 if (Directory.Exists(cloneFolder))
 {
     Printer.PrintWarning("Repository already exists!");
+    Printer.PrintInformational("You may want to check the docs to improve your usage.");
     Environment.Exit(1);
 }
 
