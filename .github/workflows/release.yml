@@ -56,3 +56,34 @@ jobs:
       with:
         name: ${{ matrix.os }}-release
         path: ./bin/${{ matrix.os }}/*
+
+  upload-artifacts:
+    needs: build-and-release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Zip the artifacts
+      run: |
+        zip -jr macos-latest-release.zip ./macos-latest-release
+        zip -jr ubuntu-latest-release.zip ./ubuntu-latest-release
+        zip -jr windows-latest-release.zip ./windows-latest-release
+
+    - name: Set up GitHub CLI
+      run: |
+        sudo apt update
+        sudo apt install gh -y
+
+    - name: Upload artifacts to the release
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        gh release create $TAG_NAME --notes "Release $TAG_NAME"
+        gh release upload "$TAG_NAME" macos-latest-release.zip --clobber
+        gh release upload "$TAG_NAME" ubuntu-latest-release.zip --clobber
+        gh release upload "$TAG_NAME" windows-latest-release.zip --clobber
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
