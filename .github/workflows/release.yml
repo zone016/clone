@@ -12,14 +12,15 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     outputs:
-      tagName: ${{ steps.set_tag_name.outputs.tagName }}
+      tag: ${{ steps.extract_tag.outputs.tag }}
     steps:
     - uses: actions/checkout@v4
 
     - name: Extract tag name
-      id: set_tag_name
-      run: echo "tagName=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-    
+      id: extract_tag
+      run: |
+        echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
     - name: Setup dotnet SDK
       uses: actions/setup-dotnet@v4
       with:
@@ -30,7 +31,7 @@ jobs:
       run: |
         make publish
         mkdir -p ./bin/${{ matrix.os }}
-        mv ./Clone.Console/bin/Release/net8.0/*/publish/Clone.Console ./bin/${{ matrix.os }}/clone
+        mv ./Clone.Console/bin/Release/net8.0/linux-x64/publish/Clone.Console ./bin/${{ matrix.os }}/clone
         sha256sum ./bin/${{ matrix.os }}/clone > ./bin/${{ matrix.os }}/sha256sum.txt
 
     - name: Build and Publish for macOS
@@ -38,48 +39,20 @@ jobs:
       run: |
         make publish
         mkdir -p ./bin/${{ matrix.os }}
-        mv ./Clone.Console/bin/Release/net8.0/*/publish/Clone.Console ./bin/${{ matrix.os }}/clone
+        mv ./Clone.Console/bin/Release/net8.0/osx-x64/publish/Clone.Console ./bin/${{ matrix.os }}/clone
         shasum -a 256 ./bin/${{ matrix.os }}/clone > ./bin/${{ matrix.os }}/sha256sum.txt
 
     - name: Build and Publish for Windows
       if: matrix.os == 'windows-latest'
       run: |
         .\Publish.ps1
-        mkdir -p .\bin\windows
-        mv .\Clone.Console\bin\Release\net8.0\win-x64\publish\Clone.Console.exe .\bin\windows\clone.exe
-        Get-FileHash .\bin\windows\clone.exe -Algorithm SHA256 | Format-List -Property Hash > .\bin\windows\sha256sum.txt
-      shell: pwsh
-
-    - name: Zip the artifacts for Linux and macOS
-      if: matrix.os != 'windows-latest'
-      run: |
-        zip -r ${{ matrix.os }}.zip ./bin/${{ matrix.os }}/
-      shell: bash
-      
-    - name: Zip the artifacts for Windows
-      if: matrix.os == 'windows-latest'
-      run: |
-        Compress-Archive -Path .\bin\windows\* -DestinationPath .\windows-x64.zip
+        New-Item -Path .\bin\${{ matrix.os }} -ItemType Directory -Force
+        Move-Item .\Clone.Console\bin\Release\net8.0\win-x64\publish\Clone.Console.exe .\bin\${{ matrix.os }}\clone.exe
+        $hash = (Get-FileHash .\bin\${{ matrix.os }}\clone.exe -Algorithm SHA256).Hash
+        echo $hash > .\bin\${{ matrix.os }}\sha256sum.txt
       shell: pwsh
 
     - uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.os }}-release
-        path: |
-          *.zip
-
-  create-release:
-    needs: build-and-release
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/download-artifact@v4
-    - name: Create Release and Upload Artifacts
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          ubuntu-release.zip
-          windows-release.zip
-          macos-release.zip
-
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        path: ./bin/${{ matrix.os }}/*
